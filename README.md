@@ -17,14 +17,13 @@ secrets for this application with least priviledge.
 
  ## Usage
 
+example main.tf using this module
+
  ```terraform
-
-# example main.tf using this module
-
- module "hvsapp" {
-  source = "jbayer/hvsapp"
-
-  # required
+module "hvsapp" {
+  source  = "jbayer/hvsapp/hcp"
+  version = "1.0.2"
+  # insert the 1 required variable here
   project_id = var.project_id
   
   # optional, defaults to example-app
