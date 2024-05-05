@@ -1,13 +1,116 @@
 # HCP Vault Secrets App with read-only Service Principal
 
 This module provisions an HVS application and an associated
- HCP Service Principal with viewer permissions for the project.
+ HCP Service Principal and Key (Client ID and Client Secret) 
+ with viewer permissions for the project.
 
 Secrets for this application should be added separately in the 
- HCP Portal, CLI, or API.
+ HCP Portal, CLI, or API. This way Terraform will not be the 
+ source of truth for the secret values. Rather, HVS itself should 
+ be the source of truth for the app secret values.
 
-The resulting client id and client secret can be used to read
-the secrets for this application with least priviledge.
+The Client ID and Client Secret in the ouptut can be used to read
+secrets for this application with least priviledge.
 
-The HCP Service Principal key will be rotated once the key
- is 30 days old or more.
+*Note:* The HCP Service Principal Key will be rotated each time it
+ is 30 days or older and Terraform runs again.
+
+ ## Usage
+
+ ```terraform
+ module "hvs_app" {
+  source = "jbayer/hvs-app"
+
+  # required
+  project_id = var.project_id
+  
+  # optional, defaults to example-app
+  app_name = var.app_name
+}
+
+variable "project_id" {
+  description = "The project ID for the HVS app"
+  type = string
+}
+
+variable "app_name" {
+  description = "The name for the HVS app"
+  type = string
+  default = "example-app"
+}
+
+output "project_id" {
+  value = module.hvs_app.project_id
+  description = "Project ID"
+}
+
+output "app_name" {
+  value = module.hvs_app.app_name
+  description = "App Name"
+}
+
+output "app_description" {
+  value = module.hvs_app.app_description
+  description = "App Description"
+}
+
+output "service_principal_name" {
+  value = module.hvs_app.service_principal_name
+  description = "Service Principal Name"
+}
+
+output "client_id" {
+  value = module.hvs_app.client_id
+  description = "Client ID"
+}
+
+# after running "tf apply", "terraform output client_secret" returns the client_secret
+output "client_secret" {
+  value = module.hvs_app.client_secret
+  description = "Client Secret"
+  sensitive = true  
+}
+
+# after running "tf apply", "terraform output map_of_secrets" returns the map
+output "map_of_secrets" {
+  value = module.hvs_app.map_of_secrets
+  description = "Map of Secrets in the app"
+  sensitive = true  
+}
+```
+
+## Example commands
+```shell
+$ teraform init
+$ terraform plan -var="project_id=1111-2222-3333-4444"
+$ terraform apply -var="project_id=1111-2222-3333-4444"
+
+# use the HCP Portal, CLI, or API to create secrets for the app
+
+# Once secrets exist, you can refresh the state
+$ terraform refresh
+
+# If the secrets exist
+terraform output map_of_secrets
+
+# Then you can use the Service Principal to read the secrets via API or CLI
+terraform output client_id
+terraform output client_secret
+
+export HCP_CLIENT_ID=$(terraform output -raw client_id)
+export HCP_CLIENT_SECRET=$(terraform output -raw client_secret)
+
+# setup the vlt CLI using the env vars for authentication
+# choose the appropriate app
+# if this does not have an interactive prompt, then run: 
+# rm ~/.vlt.json
+# and try the "vlt config init" command again
+vlt config init
+
+# now you should be able to retrieve the secrets as
+# capitalized environment variables. So if the secret
+# name is foo, then you the secret value will be 
+# associated with the FOO environment variable  
+vlt run -- env | grep FOO
+
+```
