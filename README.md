@@ -66,14 +66,14 @@ output "client_id" {
   description = "Client ID"
 }
 
-# after running "tf apply", "terraform output client_secret" returns the client_secret
+# after running "tf apply", "terraform output -raw client_secret" returns the client_secret
 output "client_secret" {
   value = module.hvsapp.client_secret
   description = "Client Secret"
   sensitive = true  
 }
 
-# after running "tf apply", "terraform output map_of_secrets" returns the map
+# after running "tf apply", "terraform output -json map_of_secrets" returns the map
 output "map_of_secrets" {
   value = module.hvsapp.map_of_secrets
   description = "Map of Secrets in the app"
