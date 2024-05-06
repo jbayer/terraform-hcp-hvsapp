@@ -22,7 +22,7 @@ example main.tf using this module
  ```terraform
 module "hvsapp" {
   source  = "jbayer/hvsapp/hcp"
-  version = "1.0.3"
+  version = "1.0.4"
   # insert the 1 required variable here
   project_id = var.project_id
   
@@ -93,6 +93,9 @@ $ terraform plan -var="project_id=$PROJECT_ID"
 $ terraform apply -var="project_id=$PROJECT_ID"
 
 # use the HCP Portal, CLI, or API to create secrets for the app
+$ vlt login
+$ vlt config init
+$ vlt secrets create foo=somevalue
 
 # Once secrets exist, you can refresh the state
 $ terraform refresh -var="project_id=$PROJECT_ID"
