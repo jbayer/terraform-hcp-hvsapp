@@ -22,7 +22,7 @@ example main.tf using this module
  ```terraform
 module "hvsapp" {
   source  = "jbayer/hvsapp/hcp"
-  version = "1.0.2"
+  version = "1.0.3"
   # insert the 1 required variable here
   project_id = var.project_id
   
