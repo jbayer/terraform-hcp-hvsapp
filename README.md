@@ -2,7 +2,7 @@
 
 This module provisions an HVS application and an associated
  HCP Service Principal and Key (Client ID and Client Secret) 
- with viewer permissions for the project.
+ with App Secret Reader permissions for the project.
 
 Secrets for this application should be added separately in the 
  HCP Portal, CLI, or API so Terraform will not be the 
@@ -22,7 +22,7 @@ example main.tf using this module
  ```terraform
 module "hvsapp" {
   source  = "jbayer/hvsapp/hcp"
-  version = "1.0.4"
+  version = "1.0.5"
   # insert the 1 required variable here
   project_id = var.project_id
   

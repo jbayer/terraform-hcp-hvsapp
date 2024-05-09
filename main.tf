@@ -50,7 +50,7 @@ resource "hcp_vault_secrets_app" "example" {
 resource "hcp_project_iam_binding" "example" {
   project_id   = var.project_id
   principal_id = hcp_service_principal.example.resource_id
-  role         = "roles/viewer"
+  role         = "roles/secrets.app-secret-reader"
 }
 
 # TODO
