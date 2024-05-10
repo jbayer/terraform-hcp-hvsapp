@@ -2,7 +2,7 @@ terraform {
   required_providers {
    hcp = {
       source  = "hashicorp/hcp"
-      version = "0.88"
+      version = "0.89"
     }
     time = {
       source = "hashicorp/time"
@@ -39,19 +39,18 @@ resource "hcp_vault_secrets_app" "example" {
   description = var.app_description
 }
 
-# Removing this as it did not work yet in HCP production
-# 
-# resource "hcp_vault_secrets_app_iam_binding" "example" {
-#  resource_name = hcp_vault_secrets_app.example.resource_name
-#  principal_id  = hcp_service_principal.example.resource_id
-#  role          = "roles/secrets.app-secret-reader"
-#}
-
-resource "hcp_project_iam_binding" "example" {
-  project_id   = var.project_id
-  principal_id = hcp_service_principal.example.resource_id
-  role         = "roles/secrets.app-secret-reader"
+resource "hcp_vault_secrets_app_iam_binding" "example" {
+  resource_name = hcp_vault_secrets_app.example.resource_name
+  principal_id  = hcp_service_principal.example.resource_id
+  role          = "roles/secrets.app-secret-reader"
 }
+
+# we want least priviledge and project level is too wide for this app
+# resource "hcp_project_iam_binding" "example" {
+#  project_id   = var.project_id
+#  principal_id = hcp_service_principal.example.resource_id
+#  role         = "roles/secrets.app-secret-reader"
+# }
 
 # TODO
 # Removed the managing of secrets as secrets are probably best managed out of band

@@ -2,7 +2,7 @@
 
 This module provisions an HVS application and an associated
  HCP Service Principal and Key (Client ID and Client Secret) 
- with App Secret Reader permissions for the project.
+ with App Secret Reader permissions for the application.
 
 Secrets for this application should be added separately in the 
  HCP Portal, CLI, or API so Terraform will not be the 
