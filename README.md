@@ -22,7 +22,7 @@ example main.tf using this module
  ```terraform
 module "hvsapp" {
   source  = "jbayer/hvsapp/hcp"
-  version = "1.0.5"
+  version = "1.0.7"
   # insert the 1 required variable here
   project_id = var.project_id
   
@@ -109,18 +109,62 @@ terraform output client_secret
 
 export HCP_CLIENT_ID=$(terraform output -raw client_id)
 export HCP_CLIENT_SECRET=$(terraform output -raw client_secret)
+export HCP_API_TOKEN=$(curl --location "https://auth.idp.hashicorp.com/oauth2/token" \
+  --header "Content-Type: application/x-www-form-urlencoded" \
+  --data-urlencode "client_id=$HCP_CLIENT_ID" \
+  --data-urlencode "client_secret=$HCP_CLIENT_SECRET" \
+  --data-urlencode "grant_type=client_credentials" \
+  --data-urlencode "audience=https://api.hashicorp.cloud" | jq -r .access_token)
 
+# The vlt CLI does not when the principal only has secrets.app-secret-reader
+# so we are going to use curl to read the secret instead
+#
 # setup the vlt CLI using the env vars for authentication
 # choose the appropriate app
 # if this does not have an interactive prompt, then run: 
 # rm ~/.vlt.json
 # and try the "vlt config init" command again
-vlt config init
+# vlt config init
 
 # now you should be able to retrieve the secrets as
 # capitalized environment variables. So if the secret
 # name is foo, then you the secret value will be 
 # associated with the FOO environment variable  
-vlt run -- env | grep FOO
+# vlt run -- env | grep FOO
+
+curl -s -H "Authorization: Bearer $HCP_API_TOKEN" https://api.cloud.hashicorp.com/secrets/2023-11-28/organizations/11eab1a9-65ca-3c91-8be1-0242ac110016/projects/11eab1a9-65e9-7b03-adc9-0242ac11000a/apps/example-app/secrets/foo:open | jq .
+{
+  "secret": {
+    "name": "foo",
+    "type": "kv",
+    "latest_version": 1,
+    "created_at": "2024-05-10T23:43:38.196650Z",
+    "created_by": {
+      "name": "James Bayer",
+      "type": "TYPE_USER",
+      "email": "jbayer@example.com"
+    },
+    "sync_status": {},
+    "static_version": {
+      "version": 1,
+      "value": "my super secret value",
+      "created_at": "2024-05-10T23:43:38.196650Z",
+      "created_by": {
+        "name": "James Bayer",
+        "type": "TYPE_USER",
+        "email": "jbayer@example.com"
+      }
+    }
+  }
+}
+
+# if you try this with an app that the Service Principal does not have access to
+# then you get a 403 HTTP response code and a JSON payload with code=7
+curl -s -H "Authorization: Bearer $HCP_API_TOKEN" https://api.cloud.hashicorp.com/secrets/2023-11-28/organizations/11eab1a9-65ca-3c91-8be1-0242ac110016/projects/11eab1a9-65e9-7b03-adc9-0242ac11000a/apps/app2/secrets/foo:open | jq .
+{
+  "code": 7,
+  "message": "",
+  "details": []
+}
 
 ```

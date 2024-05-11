@@ -62,7 +62,7 @@ resource "hcp_vault_secrets_app_iam_binding" "example" {
   
 #  secret_name  = each.key
 #  app_name     = hcp_vault_secrets_app.example.app_name
-#  secret_value = "replace_me_later"
+#  secret_value = "replace me later"
 #}
 
 # Specify the app_name in the project (one app_name per data block)
